@@ -184,7 +184,7 @@ class GestureModel():
 
     def live(self):
         # Load a certain set of weights for live predictions
-        weights_path = "/home/ramon/rromero/PycharmProjects/gesture/experiments/exp8/ep200"
+        weights_path = "/home/rromero/PycharmProjects/gesture/experiments/exp8/ep200.zip"
         self.model.load_state_dict(torch.load(weights_path))
 
         self.mp_drawing = mp.solutions.drawing_utils
@@ -226,8 +226,6 @@ class GestureModel():
 
                 # Press SPACE to make a prediction on the current frame
                 if k == 32:
-                    print("Test")
-
                     pose_landmarks = results.pose_landmarks
                     landmarks = np.zeros(99)
                     landmarks[0] = pose_landmarks.landmark[self.mp_pose.PoseLandmark.NOSE].x
@@ -333,13 +331,14 @@ class GestureModel():
                     with torch.no_grad():
                         landmarks_tensor = torch.Tensor(landmarks)
                         outputs_live = self.model(landmarks_tensor)
-                        print(outputs_live)
+                        #print(outputs_live)
                         m_live = nn.Softmax(dim=0)
                         pred_label_live = m_live(outputs_live)
                         print(pred_label_live)
                         _, predicted_live = torch.max(pred_label_live, 0)
 
-                        print(f"predicted_live: {predicted_live}")
+                        gesture_names = ["ATTENTION", "RIGHT", "LEFT", "STOP", "YES", "SHRUG", "RANDOM", "STATIC"]
+                        print(f"Predicted gesture: {gesture_names[predicted_live]}")
 
         cap.release()
 
@@ -347,4 +346,4 @@ class GestureModel():
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     model = GestureModel(root_dir="/home/ramon/rromero/PycharmProjects/gesture/dataset/BodyGestureDataset/")
-    model.test()
+    model.live()
