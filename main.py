@@ -4,7 +4,6 @@ import torch.cuda
 import numpy as np
 import sys
 import cv2
-import mediapipe as mp
 from dataset.dataset_loader import IRIGesture
 from torch.utils.data import DataLoader
 np.set_printoptions(threshold=sys.maxsize)
@@ -13,7 +12,7 @@ np.set_printoptions(threshold=sys.maxsize)
 
 class GestureModel():
 
-    def __init__(self, root_dir=None):
+    def __init__(self, root_dir=None, weights_path=None):
         # Init variables
         self._root_dir = root_dir
         self._epochs = 261
@@ -31,6 +30,11 @@ class GestureModel():
         # Define optimization algorithm (Adam) and learning rate
         lr = 0.01
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
+
+        if weights_path:
+            self.model.load_state_dict(torch.load(weights_path))
+            #weights_path = "/home/rromero/PycharmProjects/gesture/experiments/exp8/ep200.zip"
+
 
     def train(self):
         # Initialize variables
@@ -183,6 +187,8 @@ class GestureModel():
 
 
     def live(self):
+        import mediapipe as mp
+
         # Load a certain set of weights for live predictions
         weights_path = "/home/rromero/PycharmProjects/gesture/experiments/exp8/ep200.zip"
         self.model.load_state_dict(torch.load(weights_path))
@@ -341,6 +347,20 @@ class GestureModel():
                         print(f"Predicted gesture: {gesture_names[predicted_live]}")
 
         cap.release()
+
+    def infer(self, landmarks):
+        with torch.no_grad():
+            landmarks_tensor_infer = torch.Tensor(landmarks)
+            outputs_infer = self.model(landmarks_tensor_infer)
+            # print(outputs_live)
+            m_infer = nn.Softmax(dim=0)
+            pred_label_infer = m_infer(outputs_infer)
+            #print(pred_label_live)
+            #_, predicted_live = torch.max(pred_label_live, 0)
+
+            #gesture_names = ["ATTENTION", "RIGHT", "LEFT", "STOP", "YES", "SHRUG", "RANDOM", "STATIC"]
+            #print(f"Predicted gesture: {gesture_names[predicted_live]}")
+            return pred_label_infer
 
 
 # Press the green button in the gutter to run the script.
