@@ -2,11 +2,11 @@ import torch.nn as nn
 from network.classifier import Classifier
 import torch.cuda
 import numpy as np
-import sys
+#import sys
 import cv2
 from dataset.dataset_loader import IRIGesture
 from torch.utils.data import DataLoader
-np.set_printoptions(threshold=sys.maxsize)
+#np.set_printoptions(threshold=sys.maxsize)
 
 
 
@@ -340,9 +340,19 @@ class GestureModel():
                         #print(outputs_live)
                         m_live = nn.Softmax(dim=0)
                         pred_label_live = m_live(outputs_live)
-                        print(pred_label_live)
-                        _, predicted_live = torch.max(pred_label_live, 0)
+                        percentages = 100*pred_label_live
+                        #print(pred_label_live)
+                        print("PROBABILITY PERCENTAGES:")
+                        print(f"Attention: {round(percentages[0].data.item(), 2)} %")
+                        print(f"Right: {round(percentages[1].data.item(), 2)} %")
+                        print(f"Left: {round(percentages[2].data.item(), 2)} %")
+                        print(f"Stop: {round(percentages[3].data.item(), 2)} %")
+                        print(f"Yes: {round(percentages[4].data.item(), 2)} %")
+                        print(f"Shrug: {round(percentages[5].data.item(), 2)} %")
+                        print(f"Random: {round(percentages[6].data.item(), 2)} %")
+                        print(f"Static: {round(percentages[7].data.item(), 2)} %")
 
+                        _, predicted_live = torch.max(pred_label_live, 0)
                         gesture_names = ["ATTENTION", "RIGHT", "LEFT", "STOP", "YES", "SHRUG", "RANDOM", "STATIC"]
                         print(f"Predicted gesture: {gesture_names[predicted_live]}")
 
